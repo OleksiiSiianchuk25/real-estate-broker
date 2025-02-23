@@ -14,6 +14,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/properties")
+@CrossOrigin(origins = "http://localhost:3000")
 public class PropertyController {
 
     @Autowired
@@ -43,6 +44,10 @@ public class PropertyController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
+        if (property.getCity() == null || property.getCity().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+
         property.setRealtor(realtor.get());
 
         Property savedProperty = propertyService.createProperty(property);
@@ -50,6 +55,22 @@ public class PropertyController {
         return ResponseEntity.ok(savedProperty);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Property> updateProperty(@PathVariable Long id, @RequestBody Property updatedProperty) {
+        Optional<Property> existingProperty = propertyService.getPropertyById(id);
+        if (existingProperty.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Property property = existingProperty.get();
+        property.setTitle(updatedProperty.getTitle());
+        property.setPrice(updatedProperty.getPrice());
+        property.setDescription(updatedProperty.getDescription());
+
+        Property savedProperty = propertyService.createProperty(property);
+
+        return ResponseEntity.ok(savedProperty);
+    }
 
 
     @DeleteMapping("/{id}")

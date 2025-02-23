@@ -1,5 +1,7 @@
 package ua.oleksii.realestatebroker.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -39,6 +41,9 @@ public class Property {
     @Column(nullable = false)
     private Double longitude;
 
+    @Column(nullable = false)
+    private String city;
+
     @ManyToOne
     @JoinColumn(name = "realtor_id", nullable = false)
     private User realtor;
@@ -54,7 +59,20 @@ public class Property {
     }
 
     public enum Status {
-        FOR_SALE, FOR_RENT
+        FOR_SALE,
+        FOR_RENT,
+        SOLD;
+
+        @JsonCreator
+        public static Status fromString(String value) {
+            return Status.valueOf(value.toUpperCase());
+        }
+
+        @JsonValue
+        @Override
+        public String toString() {
+            return name();
+        }
     }
 
     public Long getRealtorId() {
@@ -151,6 +169,14 @@ public class Property {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 }
 
