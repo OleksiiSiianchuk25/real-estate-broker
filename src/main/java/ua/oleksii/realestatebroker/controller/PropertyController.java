@@ -23,8 +23,15 @@ public class PropertyController {
     private UserService userService;
 
     @GetMapping
-    public ResponseEntity<List<Property>> getAllProperties() {
-        List<Property> properties = propertyService.getAllProperties();
+    public ResponseEntity<List<Property>> getAllProperties(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice) {
+
+        List<Property> properties = propertyService.getFilteredProperties(search, status, type, city, minPrice, maxPrice);
         return ResponseEntity.ok(properties);
     }
 
