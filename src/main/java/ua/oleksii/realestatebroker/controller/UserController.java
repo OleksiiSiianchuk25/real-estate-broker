@@ -16,18 +16,6 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestBody User user) {
-        if (userService.findByEmail(user.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body(null);
-        }
-        if (userService.findByPhone(user.getPhone()).isPresent()) {
-            return ResponseEntity.badRequest().body(null);
-        }
-        User savedUser = userService.registerUser(user);
-        return ResponseEntity.ok(savedUser);
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
         Optional<User> user = userService.findById(id);
