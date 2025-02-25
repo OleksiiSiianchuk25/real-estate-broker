@@ -54,6 +54,8 @@ public class Property {
     @Transient
     private Long realtorId;
 
+    private String imageUrl;
+
     public enum Type {
         APARTMENT, HOUSE
     }
@@ -73,6 +75,14 @@ public class Property {
         public String toString() {
             return name();
         }
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public Long getRealtorId() {

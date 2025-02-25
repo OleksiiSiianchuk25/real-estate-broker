@@ -28,12 +28,12 @@ public class FavoriteService {
 
     public Favorite convertToEntity(FavoriteDTO favoriteDTO) {
         Optional<User> user = userService.findById(favoriteDTO.getUserId());
-        Optional<Property> property = propertyService.getPropertyById(favoriteDTO.getPropertyId());
+        Property property = propertyService.getPropertyById(favoriteDTO.getPropertyId());
 
-        if (user.isPresent() && property.isPresent()) {
+        if (user.isPresent()) {
             Favorite favorite = new Favorite();
             favorite.setUser(user.get());
-            favorite.setProperty(property.get());
+            favorite.setProperty(property);
 
             return favorite;
         }
