@@ -11,7 +11,6 @@ public class FavoriteDTO {
     }
 
     public FavoriteDTO(Long userId, Long propertyId) {
-        this.id = id;
         this.userId = userId;
         this.propertyId = propertyId;
     }
