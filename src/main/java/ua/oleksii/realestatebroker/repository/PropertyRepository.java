@@ -30,4 +30,5 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
             @Param("maxPrice") Double maxPrice
     );
 
+    long countByStatus(Property.Status status);
 }

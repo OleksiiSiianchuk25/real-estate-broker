@@ -13,6 +13,7 @@ import ua.oleksii.realestatebroker.dto.RegisterRequest;
 import ua.oleksii.realestatebroker.model.User;
 import ua.oleksii.realestatebroker.repository.UserRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -64,6 +65,18 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + email));
+    }
+
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
+
+    public User save(User user) {
+        return userRepository.save(user);
+    }
+
+    public void deleteById(Long id) {
+        userRepository.deleteById(id);
     }
 }
 
