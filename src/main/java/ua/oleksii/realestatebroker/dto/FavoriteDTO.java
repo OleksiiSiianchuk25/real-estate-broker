@@ -6,6 +6,7 @@ public class FavoriteDTO {
     private Long id;
     private Long userId;
     private Long propertyId;
+    private LocalDateTime createdAt;
 
     public FavoriteDTO() {
     }
@@ -19,6 +20,13 @@ public class FavoriteDTO {
         this.id = id;
         this.userId = userId;
         this.propertyId = propertyId;
+    }
+
+    public FavoriteDTO(Long id, Long userId, Long propertyId, LocalDateTime createdAt) {
+        this.id = id;
+        this.userId = userId;
+        this.propertyId = propertyId;
+        this.createdAt = createdAt;
     }
 
     public Long getId() {
@@ -43,5 +51,13 @@ public class FavoriteDTO {
 
     public void setPropertyId(Long propertyId) {
         this.propertyId = propertyId;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }
