@@ -84,7 +84,7 @@ public class PropertyService {
                 .orElseThrow(() -> new RuntimeException("Оголошення не знайдено"));
 
         // Перевірка: чи поточний користувач є власником оголошення
-        if (!property.getRealtor().getId().equals(currentUser.getId())) {
+        if (!property.getRealtor().getId().equals(currentUser.getId()) && currentUser.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Ви не маєте права редагувати це оголошення");
         }
 
