@@ -9,6 +9,7 @@ import ua.oleksii.realestatebroker.repository.PropertyRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PropertyService {
@@ -70,20 +71,20 @@ public class PropertyService {
         property.setType(dto.getType());
         property.setStatus(dto.getStatus());
         property.setAddress(dto.getAddress());
-        property.setLatitude(dto.getLatitude());
-        property.setLongitude(dto.getLongitude());
         property.setCity(dto.getCity());
+        // геометрія уже заповнена через DTO
+        property.setGeom(new org.locationtech.jts.geom.GeometryFactory()
+                .createPoint(new org.locationtech.jts.geom.Coordinate(
+                        dto.getLongitude(), dto.getLatitude())));
         property.setImageUrl(dto.getImageUrl());
         property.setRealtor(realtor);
         return propertyRepository.save(property);
     }
 
-    // Оновлений метод, який приймає DTO і поточного користувача
     public Property updateProperty(Long id, PropertyDTO dto, User currentUser) {
         Property property = propertyRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Оголошення не знайдено"));
 
-        // Перевірка: чи поточний користувач є власником оголошення
         if (!property.getRealtor().getId().equals(currentUser.getId()) && currentUser.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Ви не маєте права редагувати це оголошення");
         }
@@ -93,6 +94,9 @@ public class PropertyService {
         property.setPrice(dto.getPrice());
         property.setCity(dto.getCity());
         property.setAddress(dto.getAddress());
+        property.setGeom(new org.locationtech.jts.geom.GeometryFactory()
+                .createPoint(new org.locationtech.jts.geom.Coordinate(
+                        dto.getLongitude(), dto.getLatitude())));
         property.setImageUrl(dto.getImageUrl());
         property.setStatus(dto.getStatus());
         property.setType(dto.getType());
@@ -108,10 +112,14 @@ public class PropertyService {
         dto.setType(property.getType());
         dto.setStatus(property.getStatus());
         dto.setAddress(property.getAddress());
-        dto.setLatitude(property.getLatitude());
-        dto.setLongitude(property.getLongitude());
         dto.setCity(property.getCity());
+        dto.setLatitude(property.getGeom().getY());
+        dto.setLongitude(property.getGeom().getX());
         dto.setImageUrl(property.getImageUrl());
+        dto.setRealtorId(property.getRealtor().getId());
+        dto.setRealtorFullName(property.getRealtor().getFullName());
+        dto.setRealtorPhone(property.getRealtor().getPhone());
+        dto.setRealtorEmail(property.getRealtor().getEmail());
         return dto;
     }
 
@@ -122,5 +130,26 @@ public class PropertyService {
     public Property getPropertyById(Long id) {
         return propertyRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Оголошення не знайдено"));
+    }
+
+    public List<Property> findPropertiesNearCategory(String category, double radiusMeters) {
+        return propertyRepository.findPropertiesNearCategory(category, radiusMeters);
+    }
+
+    public List<Property> getPropertiesByType(Property.Type type) {
+        return propertyRepository.findFilteredProperties(
+                "",
+                null,
+                type,
+                "", 0.0, 0.0
+        );
+    }
+
+    public double getDistanceToCategory(Long propertyId, String category) {
+        return propertyRepository.findMinDistanceToCategory(propertyId, category);
+    }
+
+    public Property findByTitle(String title) {
+        return propertyRepository.findByTitle(title).orElse(null);
     }
 }

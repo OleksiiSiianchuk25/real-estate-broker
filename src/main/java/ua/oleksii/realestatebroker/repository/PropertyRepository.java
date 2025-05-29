@@ -7,6 +7,7 @@ import ua.oleksii.realestatebroker.model.Property;
 import ua.oleksii.realestatebroker.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PropertyRepository extends JpaRepository<Property, Long> {
     @Query("SELECT p FROM Property p WHERE (:status IS NULL OR p.status = :status)")
@@ -31,4 +32,39 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
     );
 
     long countByStatus(Property.Status status);
+
+    @Query(value = """
+      SELECT DISTINCT p.* 
+      FROM properties p
+      JOIN points_of_interest poi
+        ON ST_DWithin(
+             p.geom::geography, 
+             poi.geom::geography, 
+             :radiusMeters
+           )
+      WHERE poi.category = :category
+      """, nativeQuery = true)
+    List<Property> findPropertiesNearCategory(
+            @Param("category") String category,
+            @Param("radiusMeters") double radiusMeters
+    );
+
+    @Query(value = """
+      SELECT MIN(
+        ST_DistanceSphere(
+          p.geom,
+          poi.geom
+        )
+      )
+      FROM properties p
+      JOIN points_of_interest poi
+        ON poi.category = :category
+      WHERE p.id = :propertyId
+      """, nativeQuery = true)
+    double findMinDistanceToCategory(
+            @Param("propertyId") Long propertyId,
+            @Param("category") String category
+    );
+
+    Optional<Property> findByTitle(String title);
 }

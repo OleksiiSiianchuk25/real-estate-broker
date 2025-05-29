@@ -1,7 +1,6 @@
 package ua.oleksii.realestatebroker.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -10,23 +9,20 @@ import ua.oleksii.realestatebroker.dto.PropertyDTO;
 import ua.oleksii.realestatebroker.model.Property;
 import ua.oleksii.realestatebroker.model.User;
 import ua.oleksii.realestatebroker.service.PropertyService;
-import ua.oleksii.realestatebroker.service.UserService;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/properties")
 @CrossOrigin(origins = "http://localhost:3000")
+@RequiredArgsConstructor
 public class PropertyController {
 
-    @Autowired
-    private PropertyService propertyService;
-    @Autowired
-    private UserService userService;
+    private final PropertyService propertyService;
 
     @GetMapping
-    public ResponseEntity<List<Property>> getAllProperties(
+    public ResponseEntity<List<PropertyDTO>> getAllProperties(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String type,
@@ -34,8 +30,32 @@ public class PropertyController {
             @RequestParam(required = false) Double minPrice,
             @RequestParam(required = false) Double maxPrice) {
 
-        List<Property> properties = propertyService.getFilteredProperties(search, status, type, city, minPrice, maxPrice);
-        return ResponseEntity.ok(properties);
+        List<PropertyDTO> dtos = propertyService.getFilteredProperties(
+                        search, status, type, city, minPrice, maxPrice
+                ).stream()
+                .map(propertyService::convertToDTO)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PropertyDTO> getProperty(@PathVariable Long id) {
+        Property property = propertyService.getPropertyById(id);
+        PropertyDTO dto = propertyService.convertToDTO(property);
+        return ResponseEntity.ok(dto);
+    }
+
+    @PostMapping
+    @PreAuthorize("hasAnyRole('REALTOR','ADMIN')")
+    public ResponseEntity<PropertyDTO> createProperty(
+            @AuthenticationPrincipal User currentUser,
+            @RequestBody PropertyDTO propertyDTO
+    ) {
+        PropertyDTO result = propertyService.convertToDTO(
+                propertyService.createProperty(propertyDTO, currentUser)
+        );
+        return ResponseEntity.ok(result);
     }
 
     @PutMapping("/{id}")
@@ -45,9 +65,10 @@ public class PropertyController {
             @AuthenticationPrincipal User currentUser,
             @RequestBody PropertyDTO propertyDTO
     ) {
-        Property updated = propertyService.updateProperty(id, propertyDTO, currentUser);
-        PropertyDTO resultDTO = propertyService.convertToDTO(updated);
-        return ResponseEntity.ok(resultDTO);
+        PropertyDTO result = propertyService.convertToDTO(
+                propertyService.updateProperty(id, propertyDTO, currentUser)
+        );
+        return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/{id}")
@@ -57,27 +78,15 @@ public class PropertyController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Property> getProperty(@PathVariable Long id) {
-        Optional<Property> property = Optional.ofNullable(propertyService.getPropertyById(id));
-        return ResponseEntity.ok(property.orElse(null));
-    }
-
-    @PostMapping
-    @PreAuthorize("hasAnyRole('REALTOR','ADMIN')")
-    public ResponseEntity<PropertyDTO> createProperty(
-            @AuthenticationPrincipal User currentUser,
-            @RequestBody PropertyDTO propertyDTO
-    ) {
-        Property property = propertyService.createProperty(propertyDTO, currentUser);
-        PropertyDTO resultDTO = propertyService.convertToDTO(property);
-        return ResponseEntity.ok(resultDTO);
-    }
-
     @GetMapping("/my")
     @PreAuthorize("hasAnyRole('REALTOR','ADMIN')")
-    public ResponseEntity<List<Property>> getMyProperties(@AuthenticationPrincipal User currentUser) {
-        List<Property> properties = propertyService.getPropertiesByRealtor(currentUser);
-        return ResponseEntity.ok(properties);
+    public ResponseEntity<List<PropertyDTO>> getMyProperties(
+            @AuthenticationPrincipal User currentUser
+    ) {
+        List<PropertyDTO> dtos = propertyService.getPropertiesByRealtor(currentUser)
+                .stream()
+                .map(propertyService::convertToDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 }

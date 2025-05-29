@@ -3,12 +3,19 @@ package ua.oleksii.realestatebroker.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.locationtech.jts.geom.Point;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "properties")
+@Getter
+@Setter
 public class Property {
 
     @Id
@@ -36,12 +43,6 @@ public class Property {
     private String address;
 
     @Column(nullable = false)
-    private Double latitude;
-
-    @Column(nullable = false)
-    private Double longitude;
-
-    @Column(nullable = false)
     private String city;
 
     @ManyToOne
@@ -51,10 +52,26 @@ public class Property {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Transient
-    private Long realtorId;
-
     private String imageUrl;
+
+    /**
+     * Геометрія оголошення (lat/lon).
+     * Цей стовпець відповідає за радіусні запити в PostGIS.
+     */
+    @JdbcTypeCode(SqlTypes.GEOMETRY)
+    @Column(columnDefinition = "geometry(Point,4326)", nullable = false)
+    private Point geom;
+
+    // Якщо вам зручно, ви можете трансформувати Point ↔︎ lat/lon у геттерах:
+    @Transient
+    public Double getLatitude() {
+        return (geom != null) ? geom.getY() : null;
+    }
+
+    @Transient
+    public Double getLongitude() {
+        return (geom != null) ? geom.getX() : null;
+    }
 
     public enum Type {
         APARTMENT, HOUSE
@@ -76,118 +93,4 @@ public class Property {
             return name();
         }
     }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
-    public Long getRealtorId() {
-        return realtorId;
-    }
-
-    public void setRealtorId(Long realtorId) {
-        this.realtorId = realtorId;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public Type getType() {
-        return type;
-    }
-
-    public void setType(Type type) {
-        this.type = type;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public Double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
-    }
-
-    public Double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
-    }
-
-    public User getRealtor() {
-        return realtor;
-    }
-
-    public void setRealtor(User realtor) {
-        this.realtor = realtor;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
 }
-
-

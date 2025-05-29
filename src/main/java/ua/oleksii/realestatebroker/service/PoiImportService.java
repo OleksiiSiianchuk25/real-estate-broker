@@ -44,8 +44,6 @@ public class PoiImportService {
                 Point p = (Point) reader.read(geomNode.toString());
 
                 PointOfInterest poi = new PointOfInterest();
-                poi.setOsmType(props.path("type").asText());
-                poi.setOsmId(props.path("id").asLong());
                 poi.setName(props.path("name").asText(""));
 
                 String category = "";
@@ -63,9 +61,6 @@ public class PoiImportService {
                     category = props.get("public_transport").asText();
                 }
                 poi.setCategory(category);
-
-                poi.setLatitude(p.getY());
-                poi.setLongitude(p.getX());
 
                 poi.setGeom(p);
 
