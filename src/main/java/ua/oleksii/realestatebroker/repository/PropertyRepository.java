@@ -67,4 +67,6 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
     );
 
     Optional<Property> findByTitle(String title);
+
+    List<Property> findAllByRealtorId(Long realtorId);
 }

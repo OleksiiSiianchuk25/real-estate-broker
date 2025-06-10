@@ -27,4 +27,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
           GROUP BY CAST(u.createdAt AS date)
         """)
     List<Object[]> countNewUsersByDay(@Param("since") LocalDateTime since);
+
+    List<User> findAllByRole(User.Role role);
 }

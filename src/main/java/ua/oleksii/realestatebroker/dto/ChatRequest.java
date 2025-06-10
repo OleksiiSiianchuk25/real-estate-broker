@@ -3,7 +3,6 @@ package ua.oleksii.realestatebroker.dto;
 import lombok.Getter;
 import lombok.Setter;
 
-/** Запит віджета чату */
 @Setter
 @Getter
 public class ChatRequest {

@@ -1,9 +1,8 @@
-// src/main/java/ua/oleksii/realestatebroker/controller/FavoriteController.java
 package ua.oleksii.realestatebroker.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import ua.oleksii.realestatebroker.dto.FavoriteDTO;
@@ -17,68 +16,63 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/favorites")
+@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class FavoriteController {
 
     private final FavoriteService favoriteService;
     private final PropertyService propertyService;
 
-    /** Повернути всі закладки поточного користувача як DTO з деталями */
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<FavoriteDTO>> getFavoritesForCurrentUser(
             @AuthenticationPrincipal User user
     ) {
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+        // user гарантовано не null через PreAuthorize
         List<FavoriteDTO> dtos = favoriteService.getFavoritesByUser(user.getId())
                 .stream()
                 .map(fav -> {
                     FavoriteDTO dto = new FavoriteDTO();
                     dto.setId(fav.getId());
-                    dto.setUserId(fav.getUser().getId());
+                    dto.setUserId(user.getId());
                     dto.setPropertyId(fav.getProperty().getId());
                     dto.setCreatedAt(fav.getCreatedAt());
-                    // Підкладаємо детальний PropertyDTO
-                    PropertyDTO p = propertyService.convertToDTO(fav.getProperty());
-                    dto.setProperty(p);
+
+                    // Отримуємо готовий PropertyDTO з рейтингами
+                    PropertyDTO propertyDto = propertyService.getPropertyById(fav.getProperty().getId());
+                    dto.setProperty(propertyDto);
+
                     return dto;
                 })
                 .collect(Collectors.toList());
+
         return ResponseEntity.ok(dtos);
     }
 
-    /** Додати оголошення в обране поточного користувача */
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<FavoriteDTO> addFavorite(
             @AuthenticationPrincipal User user,
             @RequestBody FavoriteDTO favoriteDTO
     ) {
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
         favoriteDTO.setUserId(user.getId());
         FavoriteDTO saved = favoriteService.addFavorite(favoriteDTO);
         if (saved == null) {
             return ResponseEntity.badRequest().build();
         }
-        // Підкладаємо подробиці властивості
-        PropertyDTO p = propertyService.convertToDTO(
-                propertyService.getPropertyById(saved.getPropertyId())
-        );
-        saved.setProperty(p);
+
+        PropertyDTO propertyDto = propertyService.getPropertyById(saved.getPropertyId());
+        saved.setProperty(propertyDto);
+
         return ResponseEntity.ok(saved);
     }
 
-    /** Видалити закладку за її ID */
     @DeleteMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> removeFavorite(
             @PathVariable Long id,
             @AuthenticationPrincipal User user
     ) {
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
         favoriteService.removeFromFavorites(id);
         return ResponseEntity.ok().build();
     }

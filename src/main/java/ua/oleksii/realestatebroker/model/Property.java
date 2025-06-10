@@ -11,6 +11,8 @@ import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "properties")
@@ -54,21 +56,24 @@ public class Property {
 
     private String imageUrl;
 
-    /**
-     * Геометрія оголошення (lat/lon).
-     * Цей стовпець відповідає за радіусні запити в PostGIS.
-     */
+    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews = new ArrayList<>();
+
+    @Column(nullable = false)
+    private Double latitude;
+
+    @Column(nullable = false)
+    private Double longitude;
+
+
     @JdbcTypeCode(SqlTypes.GEOMETRY)
     @Column(columnDefinition = "geometry(Point,4326)", nullable = false)
     private Point geom;
 
-    // Якщо вам зручно, ви можете трансформувати Point ↔︎ lat/lon у геттерах:
-    @Transient
     public Double getLatitude() {
         return (geom != null) ? geom.getY() : null;
     }
 
-    @Transient
     public Double getLongitude() {
         return (geom != null) ? geom.getX() : null;
     }

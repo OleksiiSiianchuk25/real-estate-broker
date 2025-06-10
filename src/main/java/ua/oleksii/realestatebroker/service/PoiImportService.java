@@ -28,9 +28,6 @@ public class PoiImportService {
         this.mapper = mapper;
     }
 
-    /**
-     * Імпорт з GeoJSON: читаємо всі features, створюємо ентіті та зберігаємо в БД
-     */
     @Transactional
     public void importFromGeoJson(InputStream geojson) throws IOException {
         JsonNode root = mapper.readTree(geojson);

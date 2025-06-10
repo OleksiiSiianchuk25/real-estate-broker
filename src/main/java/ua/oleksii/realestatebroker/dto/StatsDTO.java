@@ -1,4 +1,3 @@
-// src/main/java/ua/oleksii/realestatebroker/dto/StatsDTO.java
 package ua.oleksii.realestatebroker.dto;
 
 import lombok.Data;

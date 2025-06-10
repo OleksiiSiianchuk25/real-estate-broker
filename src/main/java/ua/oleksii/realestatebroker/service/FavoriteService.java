@@ -7,8 +7,8 @@ import ua.oleksii.realestatebroker.model.Favorite;
 import ua.oleksii.realestatebroker.model.User;
 import ua.oleksii.realestatebroker.model.Property;
 import ua.oleksii.realestatebroker.repository.FavoriteRepository;
+import ua.oleksii.realestatebroker.repository.PropertyRepository;
 import ua.oleksii.realestatebroker.service.UserService;
-import ua.oleksii.realestatebroker.service.PropertyService;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,53 +24,45 @@ public class FavoriteService {
     private UserService userService;
 
     @Autowired
-    private PropertyService propertyService;
+    private PropertyRepository propertyRepository;
 
     public Favorite convertToEntity(FavoriteDTO favoriteDTO) {
-        Optional<User> user = userService.findById(favoriteDTO.getUserId());
-        Property property = propertyService.getPropertyById(favoriteDTO.getPropertyId());
+        User user = userService.findById(favoriteDTO.getUserId())
+                .orElseThrow(() -> new RuntimeException("Користувач не знайдений"));
+        Property property = propertyRepository.findById(favoriteDTO.getPropertyId())
+                .orElseThrow(() -> new RuntimeException("Оголошення не знайдено"));
 
-        if (user.isPresent()) {
-            Favorite favorite = new Favorite();
-            favorite.setUser(user.get());
-            favorite.setProperty(property);
-
-            return favorite;
-        }
-        return null;
+        Favorite favorite = new Favorite();
+        favorite.setUser(user);
+        favorite.setProperty(property);
+        return favorite;
     }
 
     public List<FavoriteDTO> getAllFavorites() {
         List<Favorite> favorites = favoriteRepository.findAll();
         return favorites.stream()
-                .map(favorite -> new FavoriteDTO(
-                        favorite.getId(),
-                        favorite.getUser().getId(),
-                        favorite.getProperty().getId()
+                .map(fav -> new FavoriteDTO(
+                        fav.getId(),
+                        fav.getUser().getId(),
+                        fav.getProperty().getId()
                 ))
                 .collect(Collectors.toList());
     }
 
     public FavoriteDTO addFavorite(FavoriteDTO favoriteDTO) {
         Favorite favorite = convertToEntity(favoriteDTO);
+        Favorite saved = favoriteRepository.save(favorite);
 
-        if (favorite == null) {
-            return null;
-        }
-
-        Favorite savedFavorite = favoriteRepository.save(favorite);
-        return new FavoriteDTO(
-                savedFavorite.getUser().getId(),
-                savedFavorite.getProperty().getId()
-        );
+        FavoriteDTO result = new FavoriteDTO();
+        result.setId(saved.getId());
+        result.setUserId(saved.getUser().getId());
+        result.setPropertyId(saved.getProperty().getId());
+        result.setCreatedAt(saved.getCreatedAt());
+        return result;
     }
 
     public List<Favorite> getFavoritesByUser(Long userId) {
         return favoriteRepository.findByUserId(userId);
-    }
-
-    public Favorite addToFavorites(Favorite favorite) {
-        return favoriteRepository.save(favorite);
     }
 
     public void removeFromFavorites(Long id) {

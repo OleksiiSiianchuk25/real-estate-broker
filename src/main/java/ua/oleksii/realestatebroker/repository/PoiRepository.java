@@ -10,10 +10,6 @@ import java.util.List;
 
 public interface PoiRepository extends JpaRepository<PointOfInterest, Long> {
 
-    /**
-     * Знаходить POI заданої категорії, які в межах відстані (в метрах)
-     * від точки location.
-     */
     @Query(value = ""
             + "SELECT * "
             + "FROM points_of_interest p "

@@ -22,4 +22,6 @@ public class PropertyDTO {
     private String realtorFullName;
     private String realtorPhone;
     private String realtorEmail;
+    private Double rating;
+    private Double realtorRating;
 }

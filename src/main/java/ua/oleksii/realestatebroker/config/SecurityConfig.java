@@ -3,6 +3,7 @@ package ua.oleksii.realestatebroker.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -28,7 +29,6 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserDetailsService userDetailsService;
 
-    // Позначаємо обидві залежності як @Lazy, щоб розірвати цикл
     public SecurityConfig(@Lazy JwtAuthenticationFilter jwtAuthenticationFilter,
                           @Lazy UserDetailsService userDetailsService) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
@@ -48,6 +48,14 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/assistant/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/properties/*/reviews").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/properties/*/reviews").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/realtors/*/ratings/summary").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/realtors/*/ratings").authenticated()
+//                        .requestMatchers(HttpMethod.POST, "/api/realtors/*/ratings").hasRole("USER")
+                        .requestMatchers(HttpMethod.GET,  "/api/realtors/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/realtors/*/reviews").authenticated()
+//                        .requestMatchers(HttpMethod.POST, "/api/realtors/*/reviews").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

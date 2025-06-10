@@ -15,7 +15,6 @@ public class VisitService {
         this.visitRepo = visitRepo;
     }
 
-    /** Записуємо кожен http‑запит у таблицю visits */
     public void record(HttpServletRequest req) {
         Visit v = new Visit();
         v.setPath(req.getRequestURI());

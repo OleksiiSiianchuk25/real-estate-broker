@@ -63,7 +63,7 @@ public class PoiAdminController {
         PointOfInterest existing = repo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "POI не знайдено"));
         dto.setId(id);
-        // можна оновити тільки name, category, coords
+
         existing.setName(dto.getName());
         existing.setCategory(dto.getCategory());
         existing.setGeom(new org.locationtech.jts.geom.GeometryFactory()
