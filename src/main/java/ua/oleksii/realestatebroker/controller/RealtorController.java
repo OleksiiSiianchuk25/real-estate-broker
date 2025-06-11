@@ -1,7 +1,8 @@
-// src/main/java/ua/oleksii/realestatebroker/controller/RealtorController.java
 package ua.oleksii.realestatebroker.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import ua.oleksii.realestatebroker.dto.CreateReviewRequest;
@@ -43,11 +44,17 @@ public class RealtorController {
     }
 
     @PostMapping("/{id}/reviews")
+    @PreAuthorize("isAuthenticated()")
     public ReviewDTO addRealtorReview(
             @PathVariable Long id,
             @AuthenticationPrincipal User user,
-            @RequestBody CreateReviewRequest req
+            @RequestBody @Valid CreateReviewRequest req
     ) {
-        return realtorService.addReview(id, user.getId(), req.getRating(), req.getComment());
+        return realtorService.addReview(
+                id,
+                user.getId(),
+                req.getRating(),
+                req.getComment()
+        );
     }
 }

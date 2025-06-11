@@ -1,8 +1,6 @@
 package ua.oleksii.realestatebroker.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -10,10 +8,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import ua.oleksii.realestatebroker.dto.CreateReviewRequest;
 import ua.oleksii.realestatebroker.dto.ReviewDTO;
-import ua.oleksii.realestatebroker.model.Review;
 import ua.oleksii.realestatebroker.service.ReviewService;
 
-import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -24,11 +20,7 @@ public class ReviewController {
 
     @GetMapping
     public List<ReviewDTO> list(@PathVariable Long propertyId) {
-        return reviewService.getReviews(propertyId)
-                .stream()
-                .map(r -> new ReviewDTO(r.getId(), r.getAuthor(),
-                        r.getComment(), r.getRating(), r.getCreatedAt()))
-                .toList();
+        return reviewService.getReviews(propertyId);
     }
 
     @PostMapping
@@ -38,13 +30,11 @@ public class ReviewController {
             @RequestBody @Valid CreateReviewRequest req,
             @AuthenticationPrincipal UserDetails user
     ) {
-        Review r = reviewService.addReview(
+        return reviewService.addReview(
                 propertyId,
                 user.getUsername(),
                 req.getComment(),
                 req.getRating()
         );
-        return new ReviewDTO(r.getId(), r.getAuthor(),
-                r.getComment(), r.getRating(), r.getCreatedAt());
     }
 }

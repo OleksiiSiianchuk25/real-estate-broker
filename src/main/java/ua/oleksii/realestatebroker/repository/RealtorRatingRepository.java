@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import ua.oleksii.realestatebroker.model.RealtorRating;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RealtorRatingRepository extends JpaRepository<RealtorRating, Long> {
 
@@ -15,4 +16,6 @@ public interface RealtorRatingRepository extends JpaRepository<RealtorRating, Lo
     double averageRatingByRealtor(@Param("realtorId") Long realtorId);
 
     long countByRealtorId(Long realtorId);
+
+    Optional<RealtorRating> findByRealtorIdAndAuthorId(Long realtorId, Long authorId);
 }

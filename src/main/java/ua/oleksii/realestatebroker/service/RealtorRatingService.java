@@ -11,7 +11,9 @@ import ua.oleksii.realestatebroker.model.User;
 import ua.oleksii.realestatebroker.repository.RealtorRatingRepository;
 import ua.oleksii.realestatebroker.repository.UserRepository;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,14 +23,12 @@ public class RealtorRatingService {
     private final RealtorRatingRepository ratingRepo;
     private final UserRepository userRepo;
 
-
-        @Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public RealtorRatingSummaryDTO getSummary(Long realtorId) {
         double avg = ratingRepo.averageRatingByRealtor(realtorId);
         long count = ratingRepo.countByRealtorId(realtorId);
         return new RealtorRatingSummaryDTO(avg, count);
     }
-
 
     @Transactional
     public ReviewDTO addRating(Long realtorId, Long authorId, int rating, String comment) {
@@ -37,12 +37,22 @@ public class RealtorRatingService {
         User author = userRepo.findById(authorId)
                 .orElseThrow(() -> new IllegalArgumentException("Author not found"));
 
-        RealtorRating rr = new RealtorRating();
-        rr.setRealtor(realtor);
-        rr.setAuthor(author);
-        rr.setRating(rating);
-        rr.setComment(comment);
-        rr = ratingRepo.save(rr);
+        Optional<RealtorRating> existing = ratingRepo.findByRealtorIdAndAuthorId(realtorId, authorId);
+
+        RealtorRating rr = existing.map(er -> {
+            er.setRating(rating);
+            er.setComment(comment);
+            er.setCreatedAt(Instant.now());
+            return ratingRepo.save(er);
+        }).orElseGet(() -> {
+            RealtorRating newR = new RealtorRating();
+            newR.setRealtor(realtor);
+            newR.setAuthor(author);
+            newR.setRating(rating);
+            newR.setComment(comment);
+            newR.setCreatedAt(Instant.now());
+            return ratingRepo.save(newR);
+        });
 
         return new ReviewDTO(
                 rr.getId(),

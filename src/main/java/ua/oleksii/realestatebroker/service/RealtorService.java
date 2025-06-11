@@ -6,7 +6,6 @@ import ua.oleksii.realestatebroker.dto.RealtorDTO;
 import ua.oleksii.realestatebroker.dto.ReviewDTO;
 import ua.oleksii.realestatebroker.model.User;
 import ua.oleksii.realestatebroker.repository.UserRepository;
-import ua.oleksii.realestatebroker.service.RealtorRatingService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,7 +18,8 @@ public class RealtorService {
     private final RealtorRatingService ratingService;
 
     public List<RealtorDTO> getAllRealtors() {
-        return userRepository.findAllByRole(User.Role.REALTOR).stream()
+        return userRepository.findAllByRole(User.Role.REALTOR)
+                .stream()
                 .map(u -> new RealtorDTO(
                         u.getId(),
                         u.getFullName(),
