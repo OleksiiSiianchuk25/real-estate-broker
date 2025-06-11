@@ -26,10 +26,6 @@ public class PoiAdminController {
         d.setId(e.getId());
         d.setName(e.getName());
         d.setCategory(e.getCategory());
-        d.setLatitude(e.getLatitude());
-        d.setLongitude(e.getLongitude());
-        d.setOsmType(e.getOsmType());
-        d.setOsmId(e.getOsmId());
         return d;
     }
 
@@ -38,12 +34,6 @@ public class PoiAdminController {
         if (d.getId() != null) e.setId(d.getId());
         e.setName(d.getName());
         e.setCategory(d.getCategory());
-        e.setLatitude(d.getLatitude());
-        e.setLongitude(d.getLongitude());
-        // osmType/osmId — зазвичай не міняємо у CRUD, але підставимо як є
-        e.setOsmType(d.getOsmType());
-        e.setOsmId(d.getOsmId());
-        // геометрію скласти вручну
         org.locationtech.jts.geom.GeometryFactory gf = new org.locationtech.jts.geom.GeometryFactory();
         e.setGeom(gf.createPoint(new org.locationtech.jts.geom.Coordinate(d.getLongitude(), d.getLatitude())));
         return e;
@@ -73,11 +63,9 @@ public class PoiAdminController {
         PointOfInterest existing = repo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "POI не знайдено"));
         dto.setId(id);
-        // можна оновити тільки name, category, coords
+
         existing.setName(dto.getName());
         existing.setCategory(dto.getCategory());
-        existing.setLatitude(dto.getLatitude());
-        existing.setLongitude(dto.getLongitude());
         existing.setGeom(new org.locationtech.jts.geom.GeometryFactory()
                 .createPoint(new org.locationtech.jts.geom.Coordinate(dto.getLongitude(), dto.getLatitude())));
         return toDto(repo.save(existing));

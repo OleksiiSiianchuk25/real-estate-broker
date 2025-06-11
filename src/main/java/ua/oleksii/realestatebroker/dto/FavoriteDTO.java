@@ -7,6 +7,7 @@ public class FavoriteDTO {
     private Long userId;
     private Long propertyId;
     private LocalDateTime createdAt;
+    private PropertyDTO property;  // Детальна інформація про властивість
 
     public FavoriteDTO() {
     }
@@ -59,5 +60,13 @@ public class FavoriteDTO {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public PropertyDTO getProperty() {
+        return property;
+    }
+
+    public void setProperty(PropertyDTO property) {
+        this.property = property;
     }
 }
